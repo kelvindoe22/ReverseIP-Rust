@@ -138,8 +138,6 @@ privacy.mx
 d30dpg5j057fzu.cloudfront.net
 addictivetips.com
 ec2-52-221-171-201.ap-southeast-1.compute.amazonaws.com
-powinc.net
-li995-132.members.linode.com
 roos-amerciament.vpsrdns.web-hosting.com
 www.campus.sapiensfma.com
 webdisk.sapiensfma.com

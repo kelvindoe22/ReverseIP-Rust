@@ -12,6 +12,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write, BufRead, BufReader};
 use std::path::Path;
+use std::thread;
 
 fn ReverseIP(ip: &str) {
     let url = format!("https://rapiddns.io/sameip/{}?full=1", ip);
@@ -61,16 +62,46 @@ fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> wher
 fn main() {
     Banner();
     println!("");
+
+    let mut thread_count = String::new();
+    let mut no_ips = String::new();
+    print!("Enter number of threads you want to use: ");
+    io::stdout().flush().unwrap();
+    io::stdin().read_line(&mut thread_count).unwrap();
+    let num_of_thread = thread_count.trim().parse::<u8>().unwrap();
+    print!("Enter number of ips: ");
+    io::stdout().flush().unwrap();
+    io::stdin().read_line(&mut no_ips).unwrap();
+    let ips: usize = no_ips.trim().parse().unwrap();
+
     
     let mut files = String::new();
     print!("\x1b[93m---> IP LIST : \x1b[0m");
     io::stdout().flush().unwrap();
-    let b1 = std::io::stdin().read_line(&mut files).unwrap();    
+    let b1 = std::io::stdin().read_line(&mut files).unwrap();   
+    let mut threads = Vec::with_capacity(num_of_thread as usize); 
     if let Ok(lines) = read_lines(files.trim()) {
+        let num_of_lines_for_each_thread = (ips/num_of_thread as usize) + 1;
+        let mut lines_done = 0;
+        let mut lines_for_each_thread: Vec<String> = Vec::new();
         for line in lines {
-            if let Ok(val) = line {
-                ReverseIP(&val);
+            if lines_done == num_of_lines_for_each_thread {
+                let lines_for_thread = lines_for_each_thread.drain(..).collect::<Vec<_>>();
+                threads.push(thread::spawn(
+                    move || {
+                        for l in lines_for_thread {
+                            ReverseIP(&l)
+                        }
+                    }
+                ));
+            }
+            if let Ok(s) = line {
+                lines_for_each_thread.push(s.clone());
+                lines_done += 1;
             }
         }
+    }
+    for t in threads {
+        t.join().unwrap();
     }
 }
