@@ -94,6 +94,7 @@ fn main() {
                         }
                     }
                 ));
+                lines_done = 0;
             }
             if let Ok(s) = line {
                 lines_for_each_thread.push(s.clone());
